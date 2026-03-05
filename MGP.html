@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Calculateur MGP Premium</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300,400&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: {
+                        "sans": ["Outfit", "sans-serif"]
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6', // teal base
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        },
+                        accent: {
+                            DEFAULT: '#8b5cf6', // violet
+                            hover: '#7c3aed',
+                            glow: 'rgba(139, 92, 246, 0.4)'
+                        },
+                        surface: {
+                            base: '#f8fafc',    // slate 50
+                            raised: '#ffffff',   // white
+                            glass: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    boxShadow: {
+                        'neon': '0 4px 20px rgba(139, 92, 246, 0.25)',
+                        'neon-success': '0 4px 20px rgba(16, 185, 129, 0.25)',
+                        'neon-error': '0 4px 20px rgba(244, 63, 94, 0.25)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.05)'
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            /* Slate 50 */
+            background-image:
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(20, 184, 166, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #0f172a;
+            /* Slate 900 */
+            min-height: 100vh;
+        }
+
+        /* Premium light glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            color: #0f172a;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #2ff761;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+            outline: none;
+        }
+
+        /* Smooth Entrance */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fadeUp 0.4s ease-out forwards;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        /* Remove arrows from number input */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+    </style>
+</head>
+
+<body class="antialiased font-sans selection:bg-accent selection:text-white pb-32">
+
+    <!-- Ambient background blobs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-purple-400/30 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-pulse"
+            style="animation-duration: 8s;"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-teal-400/30 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-pulse"
+            style="animation-duration: 10s;"></div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
+        <!-- Header -->
+        <header class="text-center mb-10 animate-fade-up" style="animation-delay: 0.1s;">
+            <h1
+                class="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">
+                Calculateur MGP</h1>
+            <p class="text-slate-500 text-sm font-medium">Estimez votre Moyenne Générale Pondérée avec précision.
+            </p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Left Column: Form & Results -->
+            <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-8 h-fit">
+                <!-- Form Area -->
+                <section class="glass-card rounded-3xl p-6 sm:p-8 animate-fade-up" style="animation-delay: 0.2s;">
+                    <div class="flex items-center gap-2 mb-6">
+                        <h2 class="text-lg font-bold text-slate-800 tracking-wide">Ajouter une matière</h2>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-1">Nom
+                                de la matière</label>
+                            <input id="subject-name"
+                                class="glass-input w-full rounded-xl h-14 px-5 text-base placeholder:text-slate-400"
+                                placeholder="Ex: Algèbre Linéaire" type="text" />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-1">Note
+                                    / 100</label>
+                                <input id="subject-grade"
+                                    class="glass-input w-full rounded-xl h-14 px-5 text-base placeholder:text-slate-400 font-medium"
+                                    min="0" max="100" placeholder="85" type="number" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-1">Crédits</label>
+                                <input id="subject-credits"
+                                    class="glass-input w-full rounded-xl h-14 px-5 text-base placeholder:text-slate-400 font-medium"
+                                    min="1" placeholder="4" type="number" />
+                            </div>
+                        </div>
+
+                        <button id="add-course-btn"
+                            class="w-full h-14 mt-2 bg-gradient-to-r from-accent to-purple-500 hover:from-accent-hover hover:to-purple-600 text-white text-sm font-bold tracking-wide rounded-xl shadow-neon transition-all duration-300 transform hover:-translate-y-1 focus:ring-4 focus:ring-accent/30 flex items-center justify-center gap-2">
+                            <span>A J O U T E R</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Results Dashboard -->
+                <section id="result-dashboard"
+                    class="hidden glass-card rounded-3xl p-8 animate-fade-up relative overflow-hidden"
+                    style="animation-delay: 0.1s;">
+                    <!-- Decorative glow inside the card -->
+                    <div id="result-glow"
+                        class="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full filter blur-[80px] -translate-y-1/2 translate-x-1/2 transition-colors duration-700">
+                    </div>
+
+                    <h2
+                        class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10">
+                        Résultats
+                    </h2>
+
+                    <div class="flex flex-col items-center text-center relative z-10 mb-8">
+                        <p class="text-slate-600 text-sm font-medium mb-1">MGP Finale</p>
+                        <div class="flex items-baseline justify-center gap-1">
+                            <h3 id="final-mgp"
+                                class="text-6xl sm:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-slate-900 to-slate-600 tracking-tighter">
+                                3.85</h3>
+                            <span class="text-2xl text-slate-400 font-bold">/4</span>
+                        </div>
+                    </div>
+
+                    <div
+                        class="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-6 relative z-10">
+                    </div>
+
+                    <div class="flex items-center justify-between relative z-10">
+                        <div>
+                            <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Moyenne</p>
+                            <p id="final-avg" class="text-xl sm:text-2xl font-bold text-slate-800">16.50<span
+                                    class="text-sm text-slate-400">/20</span></p>
+                        </div>
+                        <div class="h-10 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Statut</p>
+                            <div id="final-status"
+                                class="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border transition-all duration-500">
+                                ADMIS
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Course List -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- Course List -->
+                <section class="animate-fade-up" style="animation-delay: 0.3s;">
+                    <div class="flex items-center justify-between px-2 mb-4">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            Vos matières
+                        </h3>
+                        <span id="course-count"
+                            class="text-xs font-bold px-3 py-1 rounded-full bg-slate-200 text-slate-600 shadow-sm border border-slate-300/50">0</span>
+                    </div>
+
+                    <div id="course-list" class="space-y-3">
+                        <!-- Courses injected here -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Bottom Action Bar -->
+    <div class="fixed bottom-6 left-0 right-0 px-4 sm:px-6 z-50 pointer-events-none">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-3 pointer-events-auto">
+            <button id="reset-btn"
+                class="hidden h-14 px-6 bg-white/80 backdrop-blur-md border border-slate-200 text-slate-600 text-sm font-bold rounded-2xl hover:bg-slate-50 hover:text-rose-600 transition-all focus:ring-4 focus:ring-slate-100 flex items-center gap-2 shadow-lg">
+                <span class="hidden sm:inline">Effacer</span>
+            </button>
+            <button id="calculate-btn"
+                class="hidden flex-1 h-14 bg-gradient-to-r from-brand-500 to-teal-400 hover:from-brand-600 hover:to-teal-500 text-white text-sm sm:text-base font-bold tracking-wide rounded-2xl shadow-neon-success transition-all transform hover:-translate-y-1 focus:ring-4 focus:ring-teal-500/30 flex items-center justify-center gap-2">
+                CALCULER MGP
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'mgp-calculator-courses-premium';
+        let courses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+        const subjectNameInput = document.getElementById('subject-name');
+        const subjectGradeInput = document.getElementById('subject-grade');
+        const subjectCreditsInput = document.getElementById('subject-credits');
+        const addBtn = document.getElementById('add-course-btn');
+        const courseList = document.getElementById('course-list');
+        const courseCount = document.getElementById('course-count');
+        const calcBtn = document.getElementById('calculate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const resultDashboard = document.getElementById('result-dashboard');
+        const finalMgpEl = document.getElementById('final-mgp');
+        const finalAvgEl = document.getElementById('final-avg');
+        const finalStatusEl = document.getElementById('final-status');
+        const resultGlow = document.getElementById('result-glow');
+
+        // Points mapping
+        function getPointsFromNote(note) {
+            if (note >= 80) return { pt: 4.0, mention: 'A+', badge: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
+            if (note >= 75) return { pt: 3.7, mention: 'A', badge: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
+            if (note >= 70) return { pt: 3.3, mention: 'B+', badge: 'bg-teal-50 text-teal-600 border-teal-200' };
+            if (note >= 65) return { pt: 3.0, mention: 'B', badge: 'bg-teal-50 text-teal-600 border-teal-200' };
+            if (note >= 60) return { pt: 2.7, mention: 'B-', badge: 'bg-blue-50 text-blue-600 border-blue-200' };
+            if (note >= 55) return { pt: 2.3, mention: 'C+', badge: 'bg-indigo-50 text-indigo-600 border-indigo-200' };
+            if (note >= 50) return { pt: 2.0, mention: 'C', badge: 'bg-indigo-50 text-indigo-600 border-indigo-200' };
+            if (note >= 45) return { pt: 1.7, mention: 'C-', badge: 'bg-amber-50 text-amber-600 border-amber-200' };
+            if (note >= 40) return { pt: 1.3, mention: 'D+', badge: 'bg-orange-50 text-orange-600 border-orange-200' };
+            if (note >= 35) return { pt: 1.0, mention: 'D', badge: 'bg-orange-50 text-orange-600 border-orange-200' };
+            return { pt: 0, mention: 'F/E', badge: 'bg-rose-50 text-rose-600 border-rose-200' };
+        }
+
+        function renderList() {
+            courseList.innerHTML = '';
+            courseCount.innerText = `${courses.length}`;
+
+            resultDashboard.classList.add('hidden');
+            if (courses.length > 0) {
+                calcBtn.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
+            } else {
+                calcBtn.classList.add('hidden');
+                resetBtn.classList.add('hidden');
+            }
+
+            courses.forEach((course, index) => {
+                const { pt, mention, badge } = getPointsFromNote(course.grade);
+                const isEchec = course.grade < 35;
+                const borderAccent = isEchec ? 'border-l-rose-500 hover:bg-rose-50' : 'border-l-emerald-500 hover:bg-emerald-50';
+
+                const item = document.createElement('div');
+                item.className = `glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 ${borderAccent} transition-colors group animate-fade-up`;
+                item.style.animationDelay = `${index * 0.05}s`;
+
+                item.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 w-full pr-4">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-base font-bold text-slate-800 truncate">${course.name}</h4>
+                            <div class="flex items-center gap-3 mt-1 text-sm">
+                                <span class="text-slate-500"><span class="text-slate-800 font-semibold">${course.grade}</span>/100</span>
+                                <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                <span class="text-slate-500"><span class="text-slate-800 font-semibold">${course.credits}</span> crédits</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 sm:mt-0 flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-lg border ${badge} text-xs font-bold tracking-wider">
+                                ${pt.toFixed(1)} PTS (${mention})
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="removeCourse(${index})" class="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:text-white hover:bg-rose-500 hover:shadow-neon-error transition-all focus:outline-none">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                `;
+                courseList.appendChild(item);
+            });
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
+        }
+
+        window.removeCourse = function (index) {
+            courses.splice(index, 1);
+            renderList();
+        }
+
+        addBtn.addEventListener('click', () => {
+            const name = subjectNameInput.value.trim() || `Matière ${courses.length + 1}`;
+            const gradeStr = subjectGradeInput.value.trim();
+            const creditStr = subjectCreditsInput.value.trim();
+
+            if (!gradeStr || !creditStr) {
+                // Shake animation for error
+                addBtn.classList.add('animate-pulse');
+                setTimeout(() => addBtn.classList.remove('animate-pulse'), 500);
+                return;
+            }
+
+            let grade = parseFloat(gradeStr);
+            if (grade < 0) grade = 0;
+            if (grade > 100) grade = 100;
+
+            let credits = parseFloat(creditStr);
+            if (credits <= 0) credits = 1;
+
+            courses.push({ name, grade, credits });
+
+            subjectNameInput.value = '';
+            subjectGradeInput.value = '';
+            subjectCreditsInput.value = '';
+            subjectNameInput.focus();
+
+            renderList();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        });
+
+        // Add by pressing Enter
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addBtn.click();
+            });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (confirm("Effacer toutes les matières ?")) {
+                courses = [];
+                renderList();
+            }
+        });
+
+        calcBtn.addEventListener('click', () => {
+            if (courses.length === 0) return;
+
+            let totalCredits = 0;
+            let totalQualityPoints = 0;
+            let hasEchec = false;
+
+            courses.forEach(c => {
+                const { pt } = getPointsFromNote(c.grade);
+                totalCredits += c.credits;
+                totalQualityPoints += (pt * c.credits);
+                if (c.grade < 35) hasEchec = true;
+            });
+
+            const mgp = totalQualityPoints / totalCredits;
+            const avg20 = mgp * 5;
+            const isAdmis = mgp >= 2.0 && !hasEchec;
+
+            finalMgpEl.innerHTML = mgp.toFixed(3);
+            finalAvgEl.innerHTML = `${avg20.toFixed(2)}<span class="text-sm text-slate-500">/20</span>`;
+
+            if (isAdmis) {
+                finalStatusEl.className = "inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-neon-success";
+                finalStatusEl.innerText = "ADMIS";
+                finalMgpEl.className = "text-6xl sm:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-emerald-500 to-teal-600 tracking-tighter";
+                resultGlow.className = "absolute top-0 right-0 w-64 h-64 bg-emerald-400/20 rounded-full filter blur-[80px] -translate-y-1/2 translate-x-1/2 transition-colors duration-700";
+            } else {
+                finalStatusEl.className = "inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200 shadow-neon-error";
+                finalStatusEl.innerText = hasEchec ? "ÉCHEC (< 35)" : "AJOURNÉ";
+                finalMgpEl.className = "text-6xl sm:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-rose-500 to-red-600 tracking-tighter";
+                resultGlow.className = "absolute top-0 right-0 w-64 h-64 bg-rose-400/20 rounded-full filter blur-[80px] -translate-y-1/2 translate-x-1/2 transition-colors duration-700";
+            }
+
+            resultDashboard.classList.remove('hidden');
+            calcBtn.classList.add('hidden');
+
+            setTimeout(() => {
+                resultDashboard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        });
+
+        if (courses.length > 0) renderList();
+    </script>
+</body>
+
+</html>
