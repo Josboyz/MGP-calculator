@@ -12,7 +12,7 @@ Un outil web simple, rapide et élégant pour calculer la Moyenne Générale Pon
 
 ---
 
-### 👨‍💻 À propos
+### À propos
 
 Ce projet a été réalisé et structuré par moi-même pour faciliter le calcul des moyennes (Système sur 4.0 & Base 20) en fin de semestre. 
 
@@ -20,6 +20,6 @@ L'interface a été conçue en "Glassmorphism" pour être à la fois lisible sur
 
 ---
 
-### ⭐ Soutenir le projet
+### Soutenir le projet
 
 Si ce petit outil vous a été utile pour vos calculs ou a sauvé votre fin de semestre, n'hésitez pas à laisser une petite **Étoile (Star) ⭐️** en haut à droite de ce dépôt. Ça fait toujours plaisir !
