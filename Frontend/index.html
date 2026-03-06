@@ -148,9 +148,39 @@
             style="animation-duration: 10s;"></div>
     </div>
 
+    <!-- API Key Settings Modal -->
+    <div id="api-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="api-modal-backdrop"></div>
+        <div
+            class="relative w-full max-w-md bg-white/90 backdrop-blur-xl border border-slate-200 shadow-glass rounded-3xl p-6 sm:p-8 animate-fade-up">
+            <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">Clé API Gemini
+            </h3>
+            <p class="text-sm text-slate-500 mb-4">Entrez votre clé API Gemini pour activer les conseils personnalisés.
+                Elle est stockée uniquement sur votre navigateur.</p>
+            <input id="gemini-api-key" type="password"
+                class="glass-input w-full rounded-xl h-12 px-4 text-sm placeholder:text-slate-400 mb-4"
+                placeholder="AIzaSy..." />
+            <div class="flex justify-end gap-3">
+                <button id="close-modal-btn"
+                    class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors">Annuler</button>
+                <button id="save-key-btn"
+                    class="px-5 py-2 bg-gradient-to-r from-accent to-purple-500 hover:from-accent-hover hover:to-purple-600 text-white text-sm font-bold rounded-xl shadow-md transition-all">Enregistrer</button>
+            </div>
+            <p class="text-xs text-slate-400 mt-4 text-center">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank"
+                    class="text-accent hover:underline">Obtenir une clé API gratuite ici</a>
+            </p>
+        </div>
+    </div>
+
     <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
         <!-- Header -->
-        <header class="text-center mb-10 animate-fade-up" style="animation-delay: 0.1s;">
+        <header class="text-center mb-10 animate-fade-up relative" style="animation-delay: 0.1s;">
+            <button id="api-settings-btn"
+                class="absolute right-0 top-0 p-2 text-slate-400 hover:text-accent transition-colors bg-white/50 rounded-full shadow-sm"
+                title="Paramètres IA">
+                <span class="material-symbols-outlined text-xl">Clé API</span>
+            </button>
             <h1
                 class="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">
                 Calculateur MGP</h1>
@@ -244,6 +274,33 @@
                                 ADMIS
                             </div>
                         </div>
+                    </div>
+
+                    <!-- AI Advice Button added to results -->
+                    <div class="relative z-10 mt-6 pt-6 border-t border-slate-200">
+                        <button id="ask-ai-btn"
+                            class="w-full h-12 bg-slate-50 hover:bg-white border border-slate-200 hover:border-accent/50 text-slate-700 text-sm font-bold rounded-xl shadow-sm transition-all focus:ring-4 focus:ring-accent/10 flex items-center justify-center gap-2 group">
+                            Conseil IA pour le Semestre 2
+                        </button>
+                    </div>
+                </section>
+
+                <!-- AI Advice Panel -->
+                <section id="ai-advice-panel"
+                    class="hidden glass-card rounded-3xl p-6 sm:p-8 animate-fade-up relative overflow-hidden"
+                    style="animation-delay: 0.2s;">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-purple-400/10 rounded-full filter blur-[40px]">
+                    </div>
+                    <div class="flex items-center justify-between relative z-10 mb-4">
+                        <h2 class="text-sm font-bold text-accent uppercase tracking-widest flex items-center gap-2">
+                            L'avis de l'IA
+                        </h2>
+                        <button id="close-ai-btn" class="text-slate-400 hover:text-slate-700">
+                            <span class="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    </div>
+                    <div id="ai-advice-content" class="relative z-10 text-sm text-slate-600 space-y-3 leading-relaxed">
+                        <!-- Content injected here -->
                     </div>
                 </section>
             </div>
@@ -454,6 +511,146 @@
         });
 
         if (courses.length > 0) renderList();
+
+        // --- GEMINI AI ADVISOR LOGIC ---
+        const API_KEY_STORAGE = 'gemini_api_key';
+        let geminiApiKey = localStorage.getItem(API_KEY_STORAGE) || '';
+
+        const apiModal = document.getElementById('api-modal');
+        const apiModalBackdrop = document.getElementById('api-modal-backdrop');
+        const apiSettingsBtn = document.getElementById('api-settings-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const saveKeyBtn = document.getElementById('save-key-btn');
+        const apiKeyInput = document.getElementById('gemini-api-key');
+
+        const askAiBtn = document.getElementById('ask-ai-btn');
+        const aiAdvicePanel = document.getElementById('ai-advice-panel');
+        const aiAdviceContent = document.getElementById('ai-advice-content');
+        const closeAiBtn = document.getElementById('close-ai-btn');
+
+        // Modal Logic
+        function openApiModal() {
+            apiKeyInput.value = geminiApiKey;
+            apiModal.classList.remove('hidden');
+        }
+
+        function closeApiModal() {
+            apiModal.classList.add('hidden');
+        }
+
+        apiSettingsBtn.addEventListener('click', openApiModal);
+        closeModalBtn.addEventListener('click', closeApiModal);
+        apiModalBackdrop.addEventListener('click', closeApiModal);
+
+        saveKeyBtn.addEventListener('click', () => {
+            geminiApiKey = apiKeyInput.value.trim();
+            localStorage.setItem(API_KEY_STORAGE, geminiApiKey);
+            closeApiModal();
+        });
+
+        closeAiBtn.addEventListener('click', () => {
+            aiAdvicePanel.classList.add('hidden');
+        });
+
+        // Simple Markdown to HTML formatter for AI response
+        function formatMarkdown(text) {
+            let html = text
+                .replace(/^### (.*$)/gim, '<h4 class="text-slate-800 font-bold mt-3 mb-1">$1</h4>')
+                .replace(/^## (.*$)/gim, '<h3 class="text-slate-800 font-bold text-lg mt-4 mb-2">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-800">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
+            return html;
+        }
+
+        // Fetch API
+        askAiBtn.addEventListener('click', async () => {
+            if (!geminiApiKey) {
+                openApiModal();
+                return;
+            }
+
+            const currentMgp = finalMgpEl.innerText;
+            const currentAvg = finalAvgEl.innerText.split('<')[0]; // strip out html part
+            const courseDetails = courses.map(c => `- ${c.name}: ${c.grade}/100 (${c.credits} crédits)`).join('\n');
+
+            aiAdvicePanel.classList.remove('hidden');
+            aiAdviceContent.innerHTML = '<div class="flex items-center gap-2"> <span>Analyse de vos résultats par l\'IA en cours...</span></div>';
+            askAiBtn.disabled = true;
+            askAiBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const isSuccess = currentMgp >= 2.0 && finalStatusEl.innerText !== "ÉCHEC (< 35)";
+            let prompt = "";
+
+            if (isSuccess) {
+                prompt = `Agis comme un conseiller académique expert. L'étudiant a plutôt bien réussi son Semestre 1 avec une Moyenne Généralement Pondérée (MGP) de ${currentMgp}/4 (soit ${currentAvg}/20). 
+Voici ses matières du Semestre 1 à titre indicatif :
+${courseDetails}
+
+L'objectif de l'année est d'avoir une MGP globale moyenne sur les deux semestres d'au moins 2.0 pour être 'Admis'.
+CONSIGNE STRICTE : SOIS TRÈS BREF ET VA À L'ESSENTIEL (3-4 phrases maximum). 
+Ne fais AUCUNE analyse des matières du Semestre 1, car les matières seront totalement différentes au Semestre 2. 
+Félicite-le rapidement et donne-lui directement la MGP approximative qu'il devra viser au Semestre 2 pour valider l'année globale confortablement (sachant que la moyenne annuelle doit être >= 2.0).
+Formate la réponse de façon sympa et directe (utilise du gras, des retours à la ligne, et 1 ou 2 émojis max). Ne mets pas de balises HTML.`;
+            } else {
+                prompt = `Agis comme un conseiller académique expert de l'université. 
+ALERTE ROUGE : L'ÉTUDIANT A ÉCHOUÉ SON SEMESTRE 1. SA MGP EST DE SEULEMENT ${currentMgp}/4 (soit ${currentAvg}/20). 
+L'objectif de l'année est d'avoir une MGP globale moyenne sur les deux semestres d'au moins 2.0 pour être 'Admis'.
+Voici ses matières du Semestre 1 à titre indicatif :
+${courseDetails}
+
+CONSIGNE STRICTE ET IMPÉRATIVE : TU NE DOIS SOUS AUCUN PRÉTEXTE LE FÉLICITER NI DIRE "BRAVO".
+CONSIGNE 2 : SOIS TRÈS BREF ET VA À L'ESSENTIEL (3-4 phrases maximum). 
+Ne fais AUCUNE analyse des matières du Semestre 1, car les matières seront totalement différentes au Semestre 2. 
+Sois bienveillant mais très franc sur le retard accumulé. Donne-lui l'objectif mathématique CLAIR de ce qu'il devra viser au Semestre 2 pour rattraper son retard et atteindre la moyenne annuelle de 2.0. 
+Formate la réponse de façon directe (utilise du gras, des retours à la ligne, 1 émoji de soutien maximum). Ne mets pas de balises HTML.`;
+            }
+
+            try {
+                // Appel au backend Python local
+                const response = await fetch("http://127.0.0.1:8000/api/advice", {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "prompt": prompt,
+                        "api_key": geminiApiKey
+                    })
+                });
+
+                if (!response.ok) {
+                    let errMessage = "Erreur de communication avec le serveur local. Statut: " + response.status;
+                    try {
+                        const errData = await response.json();
+                        errMessage = "Erreur du backend Python : " + (errData.detail || response.status);
+                    } catch (e) { }
+
+                    if (response.status === 401 || response.status === 403) throw new Error("Clé API invalide. Veuillez vérifier vos paramètres Gemini.");
+                    if (response.status === 402) throw new Error("Erreur 402 : Crédits insuffisants (ou vous n'avez pas accès à ce modèle Gemini).");
+                    throw new Error(errMessage);
+                }
+
+                const data = await response.json();
+                const aiText = data.advice;
+
+                aiAdviceContent.innerHTML = formatMarkdown(aiText);
+
+            } catch (error) {
+                aiAdviceContent.innerHTML = `<div class="text-rose-500 font-semibold flex items-center gap-2"><span class="material-symbols-outlined">error</span> ${error.message}</div>`;
+                // If invalid key, clear it to prompt again
+                if (error.message.includes("Clé API invalide")) {
+                    geminiApiKey = '';
+                    localStorage.removeItem(API_KEY_STORAGE);
+                }
+            } finally {
+                askAiBtn.disabled = false;
+                askAiBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                aiAdvicePanel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        });
+
     </script>
 </body>
 
