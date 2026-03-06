@@ -609,7 +609,7 @@ Formate la réponse de façon directe (utilise du gras, des retours à la ligne,
 
             try {
                 // Appel au backend Python local
-                const response = await fetch("http://127.0.0.1:8000/api/advice", {
+                const response = await fetch("https://mgp-calculator-1.onrender.com/api/advice", {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json"
